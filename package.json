@@ -13,6 +13,7 @@
     "url": "git+https://github.com/khrubjak/footbetter.git"
   },
   "keywords": [],
+  "type": "module",
   "author": "",
   "license": "ISC",
   "bugs": {
