@@ -35,7 +35,7 @@ const source: sourceUrlParts = {
   country: 'england',
   competition: 'premier-league',
   view: 'results',
-  expectedPages: 8,
+  expectedPages: 2, // temporary from 8 for debug purposes
 }
 
 const scrapedSeasonsArray = Array.from(
@@ -44,8 +44,8 @@ const scrapedSeasonsArray = Array.from(
 )
 
 async function scrapeSeason(year: number) {
-  const browser = await chromium.launch({ headless: true })
-  const page = await browser.newPage()
+  //const browser = await chromium.launch({ headless: true })
+  //const page = await browser.newPage()
 
   const allMatches: Match[] = []
   const season = `${year}-` + `${year + 1}`
@@ -62,8 +62,11 @@ async function scrapeSeason(year: number) {
 
     console.log(`Scraping page ${i}: ${url}`)
 
+    const browser = await chromium.launch({ headless: true })
+    const page = await browser.newPage()
+
     await page.goto(url, {
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
     })
 
     // cookie popup
@@ -73,9 +76,14 @@ async function scrapeSeason(year: number) {
         .click({ timeout: 3000 })
     } catch {}
 
-    //await page.click("a[rel='next']")
+    try {
+      await page
+        .getByRole('button', { name: /accept/i })
+        .click({ timeout: 3000 })
+    } catch {}
 
     await page.waitForSelector('[data-testid="game-row"]')
+    await page.waitForSelector('[data-v-115522af=""]')
 
     const matches: Match[] = await page.evaluate(() => {
       const rows = document.querySelectorAll('[data-testid="game-row"]')
@@ -139,16 +147,19 @@ async function scrapeSeason(year: number) {
           console.log('Broken row detected when scraping')
         }
       })
+
       return results
     })
 
-    allMatches.push(...matches)
-
     // small delay to avoid blocking
     await page.waitForTimeout(2000)
+
+    await browser.close()
+
+    allMatches.push(...matches)
   }
 
-  await browser.close()
+  //await browser.close()
 
   fs.writeFileSync(
     outputFilePath +
