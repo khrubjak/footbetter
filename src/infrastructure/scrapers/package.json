@@ -1,0 +1,20 @@
+{
+  "name": "scrapers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.1",
+    "prettier": "3.8.3"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "fs": "^0.0.1-security"
+  }
+}
