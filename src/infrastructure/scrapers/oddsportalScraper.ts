@@ -2,8 +2,8 @@ import { chromium } from 'playwright'
 import fs from 'fs'
 
 const outputFilePath = '../../../data/'
-const startYear = 2021
-const endYear = 2021
+const startYear = 2022
+const endYear = 2022
 
 type sourceUrlParts = {
   domain: string
@@ -35,7 +35,7 @@ const source: sourceUrlParts = {
   country: 'england',
   competition: 'premier-league',
   view: 'results',
-  expectedPages: 2, // temporary from 8 for debug purposes
+  expectedPages: 8,
 }
 
 const scrapedSeasonsArray = Array.from(
@@ -62,104 +62,117 @@ async function scrapeSeason(year: number) {
 
     console.log(`Scraping page ${i}: ${url}`)
 
-    const browser = await chromium.launch({ headless: true })
-    const page = await browser.newPage()
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      try {
+        const browser = await chromium.launch({ headless: true })
+        const page = await browser.newPage()
 
-    await page.goto(url, {
-      waitUntil: 'domcontentloaded',
-    })
+        await page.goto(url, {
+          waitUntil: 'domcontentloaded',
+        })
 
-    // cookie popup
-    try {
-      await page
-        .getByRole('button', { name: /accept/i })
-        .click({ timeout: 3000 })
-    } catch {}
-
-    try {
-      await page
-        .getByRole('button', { name: /accept/i })
-        .click({ timeout: 3000 })
-    } catch {}
-
-    await page.waitForSelector('[data-testid="game-row"]')
-    await page.waitForSelector('[data-v-115522af=""]')
-
-    const matches: Match[] = await page.evaluate(() => {
-      const rows = document.querySelectorAll('[data-testid="game-row"]')
-
-      const results: Match[] = []
-
-      rows.forEach((row) => {
+        // cookie popup
         try {
-          // status
-          const status =
-            row
-              .querySelector('[data-testid="time-item"]')
-              ?.textContent?.trim() || ''
+          await page
+            .getByRole('button', { name: /accept/i })
+            .click({ timeout: 3000 })
+        } catch {}
 
-          // teams
-          const teamElements = row.querySelectorAll(
-            '[data-testid="event-participants"] a[title]',
-          )
+        try {
+          await page
+            .getByRole('button', { name: /accept/i })
+            .click({ timeout: 3000 })
+        } catch {}
 
-          const homeTeam = teamElements[0]?.getAttribute('title')?.trim() || ''
-          const awayTeam = teamElements[1]?.getAttribute('title')?.trim() || ''
+        await page.waitForSelector('[data-testid="game-row"]')
+        await page.waitForSelector('[data-v-115522af=""]')
 
-          // scores
-          const scoreNodes = row.querySelectorAll(
-            '[data-testid="event-participants"] .relative .font-bold > div',
-          )
+        const matches: Match[] = await page.evaluate(() => {
+          const rows = document.querySelectorAll('[data-testid="game-row"]')
 
-          const scores = Array.from(scoreNodes)
-            .map((el) => parseInt(el.textContent?.trim() || '', 10))
-            .filter((n) => !isNaN(n))
+          const results: Match[] = []
 
-          const homeScore = scores[0] ?? null
-          const awayScore = scores[1] ?? null
+          rows.forEach((row) => {
+            try {
+              // status
+              const status =
+                row
+                  .querySelector('[data-testid="time-item"]')
+                  ?.textContent?.trim() || ''
 
-          // odds
-          const oddsEls = row.querySelectorAll(
-            '[data-testid="odd-container-default"], [data-testid="odd-container-winning"]',
-          )
+              // teams
+              const teamElements = row.querySelectorAll(
+                '[data-testid="event-participants"] a[title]',
+              )
 
-          const oddsValues = Array.from(oddsEls)
-            .map((el) => parseFloat(el.textContent || ''))
-            .filter((n) => !isNaN(n))
+              const homeTeam =
+                teamElements[0]?.getAttribute('title')?.trim() || ''
+              const awayTeam =
+                teamElements[1]?.getAttribute('title')?.trim() || ''
 
-          const odds = {
-            home: oddsValues[0] ?? null,
-            draw: oddsValues[2] ?? null,
-            away: oddsValues[4] ?? null,
-          }
+              // scores
+              const scoreNodes = row.querySelectorAll(
+                '[data-testid="event-participants"] .relative .font-bold > div',
+              )
 
-          if (odds.home !== null && odds.draw !== null && odds.away !== null) {
-            results.push({
-              status,
-              homeTeam,
-              awayTeam,
-              homeScore,
-              awayScore,
-              odds,
-            })
-          }
-        } catch {
-          console.log('Broken row detected when scraping')
-        }
-      })
+              const scores = Array.from(scoreNodes)
+                .map((el) => parseInt(el.textContent?.trim() || '', 10))
+                .filter((n) => !isNaN(n))
 
-      return results
-    })
+              const homeScore = scores[0] ?? null
+              const awayScore = scores[1] ?? null
 
-    // small delay to avoid blocking
-    await page.waitForTimeout(2000)
+              // odds
+              const oddsEls = row.querySelectorAll(
+                '[data-testid="odd-container-default"], [data-testid="odd-container-winning"]',
+              )
 
-    await browser.close()
+              const oddsValues = Array.from(oddsEls)
+                .map((el) => parseFloat(el.textContent || ''))
+                .filter((n) => !isNaN(n))
 
-    allMatches.push(...matches)
+              const odds = {
+                home: oddsValues[0] ?? null,
+                draw: oddsValues[2] ?? null,
+                away: oddsValues[4] ?? null,
+              }
+
+              if (
+                odds.home !== null &&
+                odds.draw !== null &&
+                odds.away !== null
+              ) {
+                results.push({
+                  status,
+                  homeTeam,
+                  awayTeam,
+                  homeScore,
+                  awayScore,
+                  odds,
+                })
+              }
+            } catch {
+              console.log('Broken row detected when scraping')
+            }
+          })
+
+          return results
+        })
+
+        // small delay to avoid blocking
+        await page.waitForTimeout(2000)
+        await browser.close()
+
+        allMatches.push(...matches)
+        break
+      } catch (error) {
+        if (attempt === 3) throw error
+
+        console.log(`Retry ${attempt}`)
+        //await sleep(1000)
+      }
+    }
   }
-
-  //await browser.close()
 
   fs.writeFileSync(
     outputFilePath +
