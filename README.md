@@ -98,14 +98,12 @@ This yields a vector of expected points per match
 - Converts team strength into comparable ratings
 - Provides rating differences for matchups
 
-### `xpOutcomeModel.ts`
+### `opportunitySelector.ts`
 
-- Converts strength difference into probabilities
-- Uses:
-  - exponential draw decay
-  - logistic win/loss split
+- Finding reasonable betting opportunities
+- Betting sizes
 
-### `matchProbabilityService.ts`
+### `probabiliyPredictor.ts`
 
 - Main pipeline entry point
 - Combines:
@@ -113,6 +111,11 @@ This yields a vector of expected points per match
   - strength differences
   - probability model
 - Returns full match prediction
+
+### `main.ts`
+
+- Managing other components with parameter setup options
+- evaluating profits of strategies
 
 ### `oddsportalScraper.ts`
 
