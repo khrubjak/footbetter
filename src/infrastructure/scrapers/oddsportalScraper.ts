@@ -1,4 +1,5 @@
 import { chromium } from 'playwright'
+import type { MatchOdds } from '../../../common/types/match.types'
 import fs from 'fs'
 
 const outputFilePath = '../../../data/'
@@ -22,11 +23,7 @@ type Match = {
   awayTeam: string
   homeScore: number | null
   awayScore: number | null
-  odds: {
-    home: number | null
-    draw: number | null
-    away: number | null
-  }
+  odds: MatchOdds
 }
 
 const source: sourceUrlParts = {
