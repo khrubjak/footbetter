@@ -89,15 +89,12 @@ This yields a vector of expected points per match
 
 ## ⚙️ Core Components
 
-### `expectedPointsCalculator.ts`
+### `ratingCalculator.ts`
 
 - Builds match matrix
 - Applies draw penalties and match outcomes
 - Solves linear system using matrix inversion
 - Outputs expected points per team
-
-### `ratingCalculator.ts`
-
 - Converts team strength into comparable ratings
 - Provides rating differences for matchups
 
@@ -117,6 +114,10 @@ This yields a vector of expected points per match
   - probability model
 - Returns full match prediction
 
+### `oddsportalScraper.ts`
+
+- Data Ingestion
+
 ---
 
 ## 🔁 Full Pipeline Flow
@@ -127,13 +128,13 @@ Match Data
 ↓
 Expected Points Solver
 ↓
-Team Strength Values
-↓
-Rating Difference
-↓
-xP Difference (d)
+Rating/xP Difference
 ↓
 Probability Model
 ↓
 P(Home / Draw / Away)
+↓
+Opportunity Selector
+↓
+Bet Backtester
 ```
