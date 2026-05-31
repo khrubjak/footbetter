@@ -116,6 +116,7 @@ This yields a vector of expected points per match
 
 - Managing other components with parameter setup options
 - evaluating profits of strategies
+- run "node main.ts" for betting recommendation for particular match
 
 ### `oddsportalScraper.ts`
 

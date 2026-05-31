@@ -9,22 +9,38 @@ import {
   type Competition,
 } from './domain/ratingCalculator.ts'
 
+import { findBestBet } from './domain/betRecommender.ts'
+
 const competition: Competition = {
   country: 'england',
   name: 'premier-league',
   year: 2020,
 }
 
-const matchIndex: number = 200 // index of a match to predict
+const matchIndex: number = 10 // reversed index of a match to predict between 1 and 380
 
 const futureMatch = getRatingDifference(competition, matchIndex)
 
-console.log(futureMatch)
-
-console.log(getBookmakerProbabilities(competition, matchIndex))
+const bookmakerProbabilities = getBookmakerProbabilities(
+  competition,
+  matchIndex,
+)
 
 const prediction = predictMatchOutcome({
   xpDifference: futureMatch.diff,
 })
 
-console.log(prediction)
+const bestBet = findBestBet(bookmakerProbabilities, prediction)
+
+if (bestBet !== null) {
+  console.log(
+    `For the match: ${futureMatch.homeTeam} - ${futureMatch.awayTeam}, ` +
+      `I would suggest betting on ${String(bestBet.outcome)} result, ` +
+      `with the odds ${bestBet.decimalOdds}, while I would only recommend ` +
+      `to bet ${Math.round(bestBet.kellyFraction * 100)}% of your current betting account balance`,
+  )
+} else {
+  console.log(
+    'I would not recommend betting for this match, as bookmakers seems strong here',
+  )
+}

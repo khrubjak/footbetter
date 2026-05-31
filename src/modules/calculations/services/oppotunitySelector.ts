@@ -22,7 +22,7 @@ export type MatchPrediction = OutcomeProbabilities & {
 }
 
 export function predictMatchOutcome(input: MatchInput): MatchPrediction {
-  const { xpDifference, k = 1.2, alpha = 2.0, p0 = 0.28 } = input
+  const { xpDifference, k = 1.2, alpha = 2.0, p0 = 0.31 } = input
   const d = xpDifference * 0.35 // scaling factor (tunable)
 
   const probs = xpToOutcomeProbs({

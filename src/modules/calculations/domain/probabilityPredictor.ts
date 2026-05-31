@@ -11,7 +11,7 @@ export type XPModelParams = {
   d: number // expected points difference (home - away)
   k: number // draw decay factor
   alpha: number // outcome sensitivity
-  p0?: number // baseline draw probability at d = 0 (default 0.28)
+  p0?: number // baseline draw probability at d = 0 (default 0.31)
 }
 
 export type OutcomeProbabilities = {
@@ -35,7 +35,7 @@ function logistic(x: number): number {
  * P_away = remaining
  */
 export function xpToOutcomeProbs(params: XPModelParams): OutcomeProbabilities {
-  const { d, k, alpha, p0 = 0.28 } = params
+  const { d, k, alpha, p0 = 0.31 } = params
 
   // Draw probability (shrinks with mismatch)
   const draw = p0 * Math.exp(-k * Math.abs(d))

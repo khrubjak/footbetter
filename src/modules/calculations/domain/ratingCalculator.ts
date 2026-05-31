@@ -119,7 +119,6 @@ export function getRatingDifference(
     teams.map((key, index) => [key, expectedPoints[index]]),
   )
 
-  console.log(ratings)
   const homeRating = ratings[matches[matchIndex].homeTeam] ?? 0
   const awayRating = ratings[matches[matchIndex].awayTeam] ?? 0
 
