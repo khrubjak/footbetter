@@ -37,13 +37,11 @@ function logistic(x: number): number {
 export function xpToOutcomeProbs(params: XPModelParams): OutcomeProbabilities {
   const { d, k, alpha, p0 = 0.28 } = params
 
-  // 1. Draw probability (shrinks with mismatch)
+  // Draw probability (shrinks with mismatch)
   const draw = p0 * Math.exp(-k * Math.abs(d))
-
-  // 2. Remaining probability mass
   const remaining = 1 - draw
 
-  // 3. Directional split via logistic
+  // Directional split via logistic
   const homeShare = logistic(alpha * d)
 
   const home = remaining * homeShare

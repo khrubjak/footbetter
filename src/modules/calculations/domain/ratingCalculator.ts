@@ -146,3 +146,21 @@ export function getBookmakerOdds(
   )
   return matches[matchIndex].odds
 }
+
+export function getBookmakerProbabilities(
+  competition: Competition,
+  matchIndex: number,
+): MatchOdds {
+  const matches: Match[] = JSON.parse(
+    readFileSync(
+      `../../../data/${competition.year}-${competition.year + 1}_${competition.country}_${competition.name}.json`,
+      'utf8',
+    ),
+  )
+
+  const probabilities = matches[matchIndex].odds
+  for (const key in probabilities) {
+    probabilities[key] = 1 / probabilities[key]
+  }
+  return probabilities
+}

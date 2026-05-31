@@ -5,6 +5,7 @@ import {
 import {
   getRatingDifference,
   getBookmakerOdds,
+  getBookmakerProbabilities,
   type Competition,
 } from './domain/ratingCalculator.ts'
 
@@ -14,11 +15,13 @@ const competition: Competition = {
   year: 2020,
 }
 
-const futureMatch = getRatingDifference(competition, 200)
+const matchIndex: number = 200 // index of a match to predict
+
+const futureMatch = getRatingDifference(competition, matchIndex)
 
 console.log(futureMatch)
 
-console.log(getBookmakerOdds(competition, 200))
+console.log(getBookmakerProbabilities(competition, matchIndex))
 
 const prediction = predictMatchOutcome({
   xpDifference: futureMatch.diff,
